@@ -19,26 +19,34 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>{
             this.key = key;
             this.value = value;
         }
+        BSTNode(K key, V value, BSTNode<K, V> prevNode){
+            this.key = key;
+            this.value = value;
+            this.parent = prevNode;
+        }
 
         void put(BSTNode<K, V> node, BSTNode<K, V> prevNode) {
-            if(node == null){
+            if(node == null || node.key == null){
                 System.out.println("input node is null!");
             }else if(this.key == null){
                 this.key = node.key;
                 this.value = node.value;
+                this.left = node.left;
+                this.right = node.right;
+                this.parent = prevNode;
             }else if(node.key.compareTo(this.key) > 0){
-                if(this.left != null){
-                    this.left.put(node, this.left);
-                }else{
-                    this.left = new BSTNode<>(node.key, node.value);
-                    this.parent = prevNode;
-                }
-            }else if(node.key.compareTo(this.key) < 0){
                 if(this.right != null){
                     this.right.put(node, this.right);
                 }else{
-                    this.right = new BSTNode<>(node.key, node.value);
-                    this.parent = prevNode;
+                    this.right = node;
+                    this.right.parent = prevNode;
+                }
+            }else if(node.key.compareTo(this.key) < 0){
+                if(this.left != null){
+                    this.left.put(node, this.left);
+                }else{
+                    this.left = node;
+                    this.left.parent = prevNode;
                 }
             }
         }
@@ -50,16 +58,16 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>{
             }else if(key.compareTo(this.key) == 0){
                 result = this;
             }else if(key.compareTo(this.key) > 0){
-                if(this.left == null){
-                    result = null;
-                }else{
-                    result = this.left.get(key);
-                }
-            }else if(key.compareTo(this.key) < 0){
                 if(this.right == null){
                     result = null;
                 }else{
                     result = this.right.get(key);
+                }
+            }else if(key.compareTo(this.key) < 0){
+                if(this.left == null){
+                    result = null;
+                }else{
+                    result = this.left.get(key);
                 }
             }
             return result;
@@ -72,16 +80,16 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>{
             }else if(key.compareTo(this.key) == 0){
                 result = true;
             }else if(key.compareTo(this.key) > 0){
-                if(this.left == null){
-                    return false;
-                }else{
-                    result = this.left.containsKey(key);
-                }
-            }else if(key.compareTo(this.key) < 0){
                 if(this.right == null){
                     return false;
                 }else{
                     result = this.right.containsKey(key);
+                }
+            }else if(key.compareTo(this.key) < 0){
+                if(this.left == null){
+                    return false;
+                }else{
+                    result = this.left.containsKey(key);
                 }
             }
             return result;
@@ -167,18 +175,30 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>{
         }else if(target.key == this.root.key){
             BSTNode<K, V> targetLeft = target.left;
             BSTNode<K, V> targetRight = target.right;
-            if(this.root.left.key == target.key){
-                this.root.left = null;
+            if(targetLeft == null && targetRight == null){
+                this.root = new BSTNode<>();
+            }else if(targetLeft == null){
+                this.root = targetRight;
+                this.root.parent = null;
+            }else if(targetRight == null){
+                this.root = targetLeft;
+                this.root.parent = null;
             }else{
-                this.root.right = null;
+                if(targetLeft.size() > targetRight.size()){
+                    this.root = targetLeft;
+                    this.root.parent = null;
+                    this.root.put(targetRight, this.root);
+                }else{
+                    this.root = targetRight;
+                    this.root.parent = null;
+                    this.root.put(targetLeft, this.root);
+                }
             }
-            this.root.put(targetLeft, this.root);
-            this.root.put(targetRight, this.root);
         }else{
             BSTNode<K, V> parent = target.parent;
             BSTNode<K, V> targetLeft = target.left;
             BSTNode<K, V> targetRight = target.right;
-            if(parent.left.key == target.key){
+            if(parent.left != null && parent.left.key == target.key){
                 parent.left = null;
             }else{
                 parent.right = null;
